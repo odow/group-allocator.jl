@@ -36,8 +36,10 @@ function build_index(tmp_fn::String)
 
   if tmp_fn != ""
     index = replace(index, "{{output_class}}", "block")
+    index = replace(index, "{{not_output_class}}", "none")
     index = replace(index, "{{results_file}}", tmp_fn)
   else
+  index = replace(index, "{{not_output_class}}", "block")
     index = replace(index, "{{output_class}}", "none")
   end
   return index

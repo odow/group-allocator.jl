@@ -17,7 +17,9 @@
 		<!-- CSS
 		–––––––––––––––––––––––––––––––––––––––––––––––––– -->
 		<style>/*css*/</style>
-		
+	
+		<script type="text/javascript" src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+	
 	</head>
 	<body>
 		<!-- Primary Page Layout
@@ -30,40 +32,53 @@
 				</div>
 			</div>
 		</div>
-		<div id="div_input">
-			<div class="container padding">
-				<div class="row">
-					<form id="upload" action="/" method="POST" enctype="multipart/form-data">
+		<div id="div_input" class="padding" style="display: {{not_output_class}}">
+			<div class="container">
+				<form id="upload" action="/" method="POST" enctype="multipart/form-data">
+					<div class="row">
 						<h3>Choose file</h3>
+					
 						<p>This must be a plain text file either comma delimited (.csv) or tab delimited (.tsv). You can create a file like this by choosing <i>Save As > Comma Separated File (.csv)</i> in Microsoft Excel. Have a look at <a href="/examples/example_file.csv" download="group-allocator_example.csv">this example file</a> to see what you need.</p>
+					
 						<input type="file" id="fileselect" name="fileselect" />
+					
 						<div id="filedrag">or drop .csv file here</div>
+					
 						<div id="submitbutton">
 							<button type="submit">Upload Files</button>
 						</div>
-					</form>
-				</div>
-			</div>
-			<form id="solveForm" action="/solve" method="POST">
-				<div class="container padding">
+					
+					</div>
+				</form>
+	
+				<form id="solveForm" action="/solve" method="POST">
+				
+					<div id="loading">
+						<div id="loadingcontent">
+							<p id="loadingspinner">
+								Optimising...
+							</p>
+						</div>
+					</div>
+					
 					<div class="row">
-						<div class="one-half column">
-							<h3>Time limit (sec)</h3>
-							<p>Set the time limit for the model to solve. <input type="number" name="timelimit" min="0" value="10" /></p>
-						</div>
-						<div class="one-half column">
-							<h3>Number of Groups</h3>
-							<p>Set the number of groups to partition into. <input type="number" name="ngroups" min="1" value="2" step="1"/></p>
-						</div>
+						<h3>Solver Options</h3>
+
+						<h4>Time limit (sec)</h4>
+						<p>Set the time limit for the model to solve. <input type="number" name="timelimit" min="0" value="10" /></p>
+						<h4>Number of Groups</h4>
+						<p>Set the number of groups to partition into. <input type="number" name="ngroups" min="1" value="2" step="1"/></p>
+	
+						<input  class="button-primary button" type="submit" id="optimisebutton" onclick="" value="Run Optimisation" />
+						<input type="hidden" id="input_filename" name="input_filename" value=""/>
+	
 					</div>
-				</div>
-				<div class="container padding">
-					<div class="center" id="submitbutton">
-						<button  class="button-primary button" type="submit" onclick="document.getElementById('solveForm').submit();">Run Optimisation</button>
-					</div>
-					<input type="hidden" id="input_filename" name="input_filename" value=""/>
-				</div>
-			</form>
+			
+	
+				</form>
+	
+			</div>
+			
 		</div>
 		<div id="div_output" style="display: {{output_class}};">
 			<div class="container padding">
@@ -84,7 +99,11 @@
 				</div>
 			</div>
 		</div>
-		<script src="js/filedrag.js"></script>
+		
+		<script type="text/javascript" src="js/spin.min.js"></script>
+		<script type="text/javascript" src="js/filedrag.js"></script>
+		<script type="text/javascript" src="js/footer.js"></script>
+		
 		<!-- End Document
 		–––––––––––––––––––––––––––––––––––––––––––––––––– -->
 	</body>
