@@ -1,39 +1,17 @@
-#
-#   Plotting needs
-#   https://github.com/FVANCOP/ChartNew.js.git
-#
-#  In Morsel.js you need to make a change to the line
-#      stack = middleware(DefaultHeaders, URLDecoder, CookieDecoder, BodyDecoder, MorselApp)
-#  in the function start(app, port).
-#   Becomes
-#      stack = middleware(DefaultHeaders, URLDecoder, FileServer(pwd()), CookieDecoder, BodyDecoder, MorselApp, NotFound)
-#
 using Morsel
+using HttpCommon
+
 using DataFrames
 
 include(string(ARGS[1], "/model.jl"))
 using PartitionModel
 
-cd(string(ARGS[1], "/html"))
+cd(ARGS[1])
 
 app = Morsel.app()
 
-function getIndexWithCSS()
-  if isfile("css/site.min.css")
-    index = replace(readall("index.html"), "/*css*/", readall("css/site.min.css"))
-  else
-    css_files = readdir("css")
-    css = ""
-    for f in css_files
-      css = string(css, readall("css/" * f))
-    end
-    index = replace(readall("index.html"), "/*css*/", css)
-  end
-  return index
-end
-
 function build_index(tmp_fn::String, warning::Bool)
-  index = getIndexWithCSS()
+  index = readall("files/index.html")
   if tmp_fn != ""
     index = replace(index, "{{output_class}}", "block")
     index = replace(index, "{{not_output_class}}", "none")
@@ -66,15 +44,36 @@ get(app, "/group-allocator") do req, res
   build_index()
 end
 
-get(app, "/downloads/<filename>") do req, res
-  println("requesting file")
-  fn = "../downloads/" * req.params[:filename]
-  if isfile(fn)
-    d = readall(fn)
-    rm(fn)
-    return d
+# =================================
+# Hack to get file server running
+path_in_dir(p::String, d::String) = length(p) > length(d) && noslash(p[1:length(d)]) == noslash(d)
+noslash(x::String) = replace(replace(x, "/", ""), "\\", "")
+get(app, "/files/<folder>/<filename>") do req, res
+  root = string(ARGS[1], "/files")
+  folder = req.params[:folder]
+  filename = req.params[:filename]
+  req_resource = folder * "/" * filename
+
+  path = normpath(root, req_resource)
+  # protect against dir-escaping
+  if path_in_dir(path, root) && isfile(path)
+    r = HttpCommon.FileResponse(path)
+    if folder == "downloads"
+      rm(path)
+    end
+    return r
   end
 end
+# =================================
+
+
+
+
+
+
+
+
+
 
 
 post(app, "/group-allocator") do req, res
@@ -86,17 +85,17 @@ post(app, "/group-allocator") do req, res
   tmp_fn = ""
 
   try
-    df = PartitionModel.Solve("uploads/" * fn, ng, tl)
-    tmp_fn = "downloads/" * randstring(20) * ".csv"
+    df = PartitionModel.Solve("files/uploads/" * fn, ng, tl)
+    tmp_fn = "files/downloads/" * randstring(20) * ".csv"
     println("Writing solution")
-    writetable("../" * tmp_fn, df)
+    writetable(tmp_fn, df)
   catch
     println("Unable to solve model")
     warning = true
   end
 
   try
-    rm("uploads/" * fn)
+    rm("files/uploads/" * fn)
   catch
   end
 
@@ -106,7 +105,7 @@ end
 getpid
 
 post(app, "/") do req, res
-  f = open(string("uploads/", req.http_req.headers["X_FILENAME"]), "w")
+  f = open(string("files/uploads/", req.http_req.headers["X_FILENAME"]), "w")
   try
     write(f, req.http_req.data)
   catch

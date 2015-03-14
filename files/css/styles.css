@@ -77,7 +77,7 @@ pre
 	margin: 2px 0;
 	border: 1px inset #446;
 	border-radius: 5px;
-	background: #eee url("images/progress.png") 100% 0 repeat-y;
+	background: #eee url("/files/images/progress.png") 100% 0 repeat-y;
 }
 
 .success {

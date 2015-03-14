@@ -419,7 +419,7 @@ there.
 
 
 .header {
-  background-image: url("images/overlay.png"), url("images/banner.png");
+  background-image: url("/files/images/overlay.png"), url("/files/images/banner.png");
   background-size: cover;
   background-position: center;
   padding: 16em 0em 14em;
