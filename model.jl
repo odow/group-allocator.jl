@@ -17,7 +17,7 @@ type PartitionData
 end
 
 function Solve(fname::String, n_groups::Int, timelimit::Float64=999.9)
-  Solve(CreateData(fname), n_groups, timelimit)
+  return Solve(CreateData(fname), n_groups, timelimit)
 end
 
 function GroupSize(m::Int, n::Int)
@@ -34,9 +34,10 @@ end
 
 function Solve(data::PartitionData, n_groups::Int, timelimit::Float64=999.9)
   groups = GroupSize(n_groups, data.n)
-
+  println("Creating Model")
   m = Model(solver=CbcSolver(seconds=timelimit))
 
+  println("Adding variables")
   @defVar(m, x[1:length(data.Ids), 1:n_groups], Bin, string("x", i, j))
   @defVar(m, mmin[data.vNum])           # Minimum mean of group
   @defVar(m, mmax[data.vNum])           # Maximum mean of group
@@ -44,7 +45,7 @@ function Solve(data::PartitionData, n_groups::Int, timelimit::Float64=999.9)
   @defVar(m, vmax[data.vNum])           # Maximum variance of group
   @defVar(m, cvio[data.vCat] >= 0)           # Violation of categorical constraint
 
-
+  println("Setting objective")
   k1 = 1.0
   k2 = 1.0
   k3 = 1000.0
@@ -54,6 +55,7 @@ function Solve(data::PartitionData, n_groups::Int, timelimit::Float64=999.9)
                 + k3 * sum(cvio)
                 )
 
+  println("Adding constraints")
   # Each entity can only be allocated to single group
   @addConstraint(m, c1[i=1:data.n], sum([x[i,j] for j=1:n_groups]) == 1)
 
@@ -67,6 +69,7 @@ function Solve(data::PartitionData, n_groups::Int, timelimit::Float64=999.9)
   @addConstraint(m, cVarMax[v=data.vNum, j=1:n_groups], sum([(data.df[v][i] - data.nMet[v]["mean"])^2 * x[i, j] for i=1:data.n]) <= groups[j] * vmax[v])
 
 
+  println("Solving")
   status = solve(m)
 
   if status == :Optimal || status == :UserLimit
@@ -94,7 +97,7 @@ end
 
 function CreateData(fname::String)
   df = readtable(fname)
-
+  println("read file into dataframe")
   Ids = df[names(df)[1]]
   vNum = Array(Symbol, 0)
   vCat = Array(Symbol, 0)

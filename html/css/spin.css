@@ -31,3 +31,7 @@
 }
 
 form {margin: 0;}
+
+.warning {
+    color: red;
+}

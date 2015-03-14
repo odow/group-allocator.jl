@@ -45,6 +45,7 @@ Developed by Craig Buckler (@craigbuckler) of OptimalWorks.net
 
 	// upload JPEG files
 	function UploadFile(file) {
+		$id('warningmsg').style.display = "none";
 
 		var xhr = new XMLHttpRequest();
 		
@@ -66,6 +67,11 @@ Developed by Craig Buckler (@craigbuckler) of OptimalWorks.net
 				$id("filedrag").innerHTML = file.name;
 				$id("input_filename").value = file.name;
 				o.className = (xhr.status == 200 ? "success" : "failure");
+				if (xhr.status == 200) {
+					$id("optimisebutton").style.display = "block";					
+				} else {
+					$id("optimisebutton").style.display = "none";									
+				}
 			}
 		};
 

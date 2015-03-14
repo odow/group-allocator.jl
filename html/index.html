@@ -32,13 +32,29 @@
 				</div>
 			</div>
 		</div>
+
+		
+
 		<div id="div_input" class="padding" style="display: {{not_output_class}}">
 			<div class="container">
+
+				<div class="row">
+					<h2>I don't feel comfortable giving you my data</h2>
+					<p>When you upload a file to us, we save it to our server. When you click optimise, we create and run the model. Once we have the solution, we delete the original copy of your data and make a results file for you to download. If you don't click optimise the original copy gets deleted after 1 hour. The results copy sits on our server until either you download it, or 1 hour has passed. </p>
+				</div>
+
+				<div class="row warning" id="warningmsg" style="display: {{warning}}">
+					<h4>Opps! Something went wrong</h4>
+					<p>We couldn't solve the model. Are you sure your data is in the correct format?</p>
+				</div>
+
 				<form id="upload" action="/" method="POST" enctype="multipart/form-data">
 					<div class="row">
 						<h3>Choose file</h3>
 					
-						<p>This must be a plain text file either comma delimited (.csv) or tab delimited (.tsv). You can create a file like this by choosing <i>Save As > Comma Separated File (.csv)</i> in Microsoft Excel. Have a look at <a href="/examples/example_file.csv" download="group-allocator_example.csv">this example file</a> to see what you need.</p>
+						<p>This must be a plain text file either comma delimited (.csv) or tab delimited (.tsv). You can create a file like this by choosing <i>Save As > Comma Separated File (.csv)</i> in Microsoft Excel. Have a look at <a href="/examples/example_file.csv" download="group-allocator_example.csv">this example file</a> to see what you need. The column <i>ID</i> contains unique values for each row. Columns <i>V1, V2</i> and <i>V4</i> are categorical variables. Column <i>V2</i> is a numeric variable. The model tries to balance the mean and variance of the numerical variables between each group, and ensure that there are equal numbers of each category in all the groups for each category.</p>
+
+						<p>The file should have headers which are the names of the variables. The first column will be used as a unique identifier for each row. All other columns will be treated as variables.</p>
 					
 						<input type="file" id="fileselect" name="fileselect" />
 					
@@ -51,7 +67,7 @@
 					</div>
 				</form>
 	
-				<form id="solveForm" action="/solve" method="POST">
+				<form id="solveForm" action="/group-allocator" method="POST">
 				
 					<div id="loading">
 						<div id="loadingcontent">
@@ -63,15 +79,25 @@
 					
 					<div class="row">
 						<h3>Solver Options</h3>
+					</div>
+					<div class="row">
+						<div class="one-half column">
+						<h5>Number of Groups</h5>
+						<p>Set the number of groups to partition into.</p>
 
-						<h4>Time limit (sec)</h4>
-						<p>Set the time limit for the model to solve. <input type="number" name="timelimit" min="0" value="10" /></p>
-						<h4>Number of Groups</h4>
-						<p>Set the number of groups to partition into. <input type="number" name="ngroups" min="1" value="2" step="1"/></p>
-	
-						<input  class="button-primary button" type="submit" id="optimisebutton" onclick="" value="Run Optimisation" />
+						<input type="number" name="ngroups" min="1" value="2" step="1"/>
+						</div>
+
+						<div class="one-half column">
+						<h5>Time limit (sec)</h5>
+						<p>This type of model can take a very long time to find the <i>best</i> solution. Therefore, you probably want to set a time limit for the solver. The longer the better.</p>
+
+						<input type="number" name="timelimit" min="0" value="10" />
+						</div>
+					</div>
+					<div class="row">						
+						<input  class="button-primary button" type="submit" id="optimisebutton" onclick="" value="Run Optimisation" style="display: none" />
 						<input type="hidden" id="input_filename" name="input_filename" value=""/>
-	
 					</div>
 			
 	
