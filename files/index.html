@@ -70,7 +70,7 @@
 					</div>
 				</form>
 	
-				<form id="solveForm" action="/group-allocator" method="POST">
+				<form id="solveForm" action="/group-allocator" method="POST" style="display: none" >
 				
 					<div id="loading">
 						<div id="loadingcontent">
@@ -83,6 +83,24 @@
 					<div class="row">
 						<h3>Solver Options</h3>
 					</div>
+					<div class="row">
+						<h5>Variables</h5>
+						<p>Unhighlight any variables you wish to ignore.</p>
+						
+	
+						<table class="u-full-width">
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>Include</th>
+								</tr>
+							</thead>
+							<tbody id="RowVariables">
+								<!-- {{ROWS}} -->
+							</tbody>
+						</table>
+					</div>
+
 					<div class="row">
 						<div class="one-half column">
 						<h5>Number of Groups</h5>
@@ -99,7 +117,7 @@
 						</div>
 					</div>
 					<div class="row">						
-						<input  class="button-primary button" type="submit" id="optimisebutton" onclick="" value="Run Optimisation" style="display: none" />
+						<input  class="button-primary button" type="submit" id="optimisebutton" onclick="" value="Run Optimisation" />
 						<input type="hidden" id="input_filename" name="input_filename" value=""/>
 					</div>
 			

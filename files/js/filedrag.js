@@ -68,17 +68,48 @@ Developed by Craig Buckler (@craigbuckler) of OptimalWorks.net
 				$id("input_filename").value = file.name;
 				o.className = (xhr.status == 200 ? "success" : "failure");
 				if (xhr.status == 200) {
-					$id("optimisebutton").style.display = "block";					
+					$id("solveForm").style.display = "block";
+
+					var reader = new FileReader();
+					reader.onload = function(progressEvent){
+						var myrow = '<tr>\
+										<td><div id=\"{{NAME}}\">{{NAME}}</div></td>\
+										<td>\
+											<div class=\"onoffswitch\">\
+												<input type=\"checkbox\" name=\"var_{{NAME}}\" class=\"onoffswitch-checkbox\" id=\"var_{{NAME}}\" checked>\
+												<label class=\"onoffswitch-label\" for=\"var_{{NAME}}\">\
+												<div class=\"onoffswitch-inner\">\
+													<span class=\"onoffswitch-active\"><span class=\"onoffswitch-switch\">YES</span></span>\
+													<span class=\"onoffswitch-inactive\"><span class=\"onoffswitch-switch\">NO</span></span>\
+												</div>\
+												</label>\
+											</div>\
+										</td>\
+									</tr>';
+					    var lines = this.result.split('\n');
+						var cols = lines[0].split(",")
+						var s = "";
+						for (var c in cols) {
+							s += myrow.replace(/{{NAME}}/g, cols[c].replace(/^\s+|\s+$/g, '')) + "\n";
+						}
+						$id("RowVariables").innerHTML = s;
+
+					  };
+					reader.readAsText(file);
 				} else {
-					$id("optimisebutton").style.display = "none";									
+					$id("solveForm").style.display = "none";									
 				}
 			}
 		};
 
 		// start upload
-		xhr.open("POST", $id("upload").action, true);
-		xhr.setRequestHeader("X_FILENAME", file.name);
-		xhr.send(file);
+		if (file.type == "text/csv") {
+			xhr.open("POST", $id("upload").action, true);
+			xhr.setRequestHeader("X_FILENAME", file.name);
+			xhr.send(file);
+		} else {
+			alert("You must upload a .csv file.")
+		}
 
 	}
 

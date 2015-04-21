@@ -16,8 +16,8 @@ type PartitionData
   cMet::Dict{Symbol, Dict{String, Float64}} # Categorical metrics
 end
 
-function Solve(fname::String, n_groups::Int, timelimit::Float64=999.9)
-  return Solve(CreateData(fname), n_groups, timelimit)
+function Solve(fname::String, n_groups::Int, timelimit::Float64=999.9, vars=[])
+  return Solve(CreateData(fname, vars), n_groups, timelimit)
 end
 
 function GroupSize(m::Int, n::Int)
@@ -34,10 +34,9 @@ end
 
 function Solve(data::PartitionData, n_groups::Int, timelimit::Float64=999.9)
   groups = GroupSize(n_groups, data.n)
-  println("Creating Model")
+
   m = Model(solver=CbcSolver(seconds=timelimit))
 
-  println("Adding variables")
   @defVar(m, x[1:length(data.Ids), 1:n_groups], Bin, string("x", i, j))
   @defVar(m, mmin[data.vNum])           # Minimum mean of group
   @defVar(m, mmax[data.vNum])           # Maximum mean of group
@@ -45,7 +44,6 @@ function Solve(data::PartitionData, n_groups::Int, timelimit::Float64=999.9)
   @defVar(m, vmax[data.vNum])           # Maximum variance of group
   @defVar(m, cvio[data.vCat] >= 0)           # Violation of categorical constraint
 
-  println("Setting objective")
   k1 = 1.0
   k2 = 1.0
   k3 = 1000.0
@@ -55,7 +53,6 @@ function Solve(data::PartitionData, n_groups::Int, timelimit::Float64=999.9)
                 + k3 * sum(cvio)
                 )
 
-  println("Adding constraints")
   # Each entity can only be allocated to single group
   @addConstraint(m, c1[i=1:data.n], sum([x[i,j] for j=1:n_groups]) == 1)
 
@@ -68,8 +65,6 @@ function Solve(data::PartitionData, n_groups::Int, timelimit::Float64=999.9)
   @addConstraint(m, cVarMax[v=data.vNum, j=1:n_groups], sum([(data.df[v][i] - data.nMet[v]["mean"])^2 * x[i, j] for i=1:data.n]) >= groups[j] * vmin[v])
   @addConstraint(m, cVarMax[v=data.vNum, j=1:n_groups], sum([(data.df[v][i] - data.nMet[v]["mean"])^2 * x[i, j] for i=1:data.n]) <= groups[j] * vmax[v])
 
-
-  println("Solving")
   status = solve(m)
 
   if status == :Optimal || status == :UserLimit
@@ -95,15 +90,20 @@ function get_solution(x, data::PartitionData)
   return solution
 end
 
-function CreateData(fname::String)
+function CreateData(fname::String, vars::Vector=[])
   df = readtable(fname)
-  println("read file into dataframe")
   Ids = df[names(df)[1]]
   vNum = Array(Symbol, 0)
   vCat = Array(Symbol, 0)
   vMet = Dict{Symbol, Dict{String, Float64}} ()
   cMet = Dict{Symbol, Dict{String, Float64}} ()
   for v in names(df)[2:end]
+  	if length(vars) > 0
+	   	if !(string(v) in vars)
+  			# Excluded variable
+  			continue
+  		end
+  	end
     if typeof(df[v]) == DataArray{UTF8String, 1}
       push!(vCat, v)
       cMet[v] = categorical_metrics(df[v])
@@ -139,6 +139,3 @@ end
 
 
 end
-
-# s = "big_example.csv"
-# df = PartitionModel.Solve(s, 20, 10.0)

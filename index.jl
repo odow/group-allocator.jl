@@ -1,12 +1,10 @@
 using Morsel
 using HttpCommon
-
 using DataFrames
 
-include(string(ARGS[1], "/model.jl"))
-using PartitionModel
-
 cd(ARGS[1])
+
+include("model.jl")
 
 app = Morsel.app()
 
@@ -66,28 +64,23 @@ get(app, "/files/<folder>/<filename>") do req, res
 end
 # =================================
 
-
-
-
-
-
-
-
-
-
-
 post(app, "/group-allocator") do req, res
   tl = parsefloat(req.state[:data]["timelimit"])
   fn = string(req.state[:data]["input_filename"])
   ng = parseint(req.state[:data]["ngroups"])
+  vars = Array(String, 0)
+  for k in keys(req.state[:data])
+    if contains(k, "var_") && req.state[:data][k] == "on"
+      push!(vars, k)
+    end
+  end
   println("Timelimit: " * string(tl) * " N: " * string(ng) * " Filename: " * fn)
   warning = false
   tmp_fn = ""
 
   try
-    df = PartitionModel.Solve("files/uploads/" * fn, ng, tl)
+    df = PartitionModel.Solve("files/uploads/" * fn, ng, tl, vars)
     tmp_fn = "files/downloads/" * randstring(20) * ".csv"
-    println("Writing solution")
     writetable(tmp_fn, df)
   catch
     println("Unable to solve model")
