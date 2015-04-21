@@ -90,7 +90,7 @@ Developed by Craig Buckler (@craigbuckler) of OptimalWorks.net
 						var cols = lines[0].split(",")
 						var s = "";
 						for (var c in cols) {
-							s += myrow.replace(/{{NAME}}/g, cols[c].replace(/^\s+|\s+$/g, '')) + "\n";
+							s += myrow.replace(/{{NAME}}/g, cols[c].replace(/^\s+|\s+$/g, '').replace("\"", "\\\"").replace("\'", "\\\'")) + "\n";
 						}
 						$id("RowVariables").innerHTML = s;
 

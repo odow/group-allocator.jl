@@ -47,7 +47,7 @@ end
 path_in_dir(p::String, d::String) = length(p) > length(d) && noslash(p[1:length(d)]) == noslash(d)
 noslash(x::String) = replace(replace(x, "/", ""), "\\", "")
 get(app, "/files/<folder>/<filename>") do req, res
-  root = string(ARGS[1], "/files")
+  root = "files"
   folder = req.params[:folder]
   filename = req.params[:filename]
   req_resource = folder * "/" * filename
